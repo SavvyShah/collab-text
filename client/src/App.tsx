@@ -1,35 +1,47 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import "./App.css";
+import * as A from "@automerge/automerge/next";
+
+type TextDocument = {
+  text: string;
+};
+
+const initialText = "Hello how are you?";
+
+let doc: A.Doc<TextDocument> = A.from({ text: initialText });
 
 function App() {
-  const [count, setCount] = useState(0)
-
+  const [input1, setInput1] = useState<string>(initialText);
+  const [input2, setInput2] = useState<string>(initialText);
+  const handleSync = () => {
+    const originalDoc = A.change(doc, (d) => {
+      A.updateText(d, ["text"], input1);
+    });
+    let forkedDoc = A.clone(doc);
+    forkedDoc = A.change(forkedDoc, (d) => {
+      A.updateText(d, ["text"], input2);
+    });
+    doc = A.merge(originalDoc, forkedDoc);
+    setInput1(doc.text);
+    setInput2(doc.text);
+  };
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div>
+      <input
+        type="text"
+        value={input1}
+        onChange={(e) => setInput1(e.target.value)}
+      />
+      <input
+        type="text"
+        value={input2}
+        onChange={(e) => {
+          setInput2(e.target.value);
+        }}
+      />
+      <button onClick={() => handleSync()}>🔁</button>
+    </div>
+  );
 }
 
-export default App
+export default App;
