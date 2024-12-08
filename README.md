@@ -1,2 +1,5 @@
-# collab-text
-A collaborative rich text editor
+# Collaborative Text Editor
+
+## Characteristics
+
+## System architecture
